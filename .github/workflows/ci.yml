@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: 语法检查与逻辑测试
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 检查所有 JavaScript 语法
+        run: |
+          find extension api tests -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+
+      - name: 检查 JSON 配置
+        run: |
+          node -e "const fs=require('fs'); for (const f of ['package.json','vercel.json','extension/manifest.json']) { JSON.parse(fs.readFileSync(f,'utf8')); console.log(f + ' OK'); }"
+
+      - name: 运行逻辑单元测试
+        run: node tests/logic.test.js

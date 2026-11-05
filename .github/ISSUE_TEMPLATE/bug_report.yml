@@ -1,0 +1,89 @@
+name: 🐛 Bug 报告
+description: 扩展、后端或排行榜出了问题
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！请先确认你已经搜过已有 Issue。
+        **请勿粘贴 API Key、SUPABASE_SERVICE_ROLE_KEY、.env 内容或完整设备 UUID。**
+
+  - type: input
+    id: version
+    attributes:
+      label: 版本
+      description: 在 chrome://extensions 的扩展卡片或 manifest.json 里查看
+      placeholder: "1.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 出问题的模块
+      options:
+        - Popup 主界面
+        - 成就墙
+        - 干饭榜
+        - 设置 / API Key
+        - 定时刷新 / 角标
+        - Vercel 后端
+        - Supabase / 数据库
+        - 图标或形象素材
+        - 其它
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 越具体越好，例如「点刷新 -> 等 10 秒 -> 出现红色错误条」
+      placeholder: |
+        1. 打开 Popup
+        2. 点击「再吃一口（刷新）」
+        3. 看到 ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果
+      placeholder: 应该显示余额 / 应该弹出成就 / 应该返回 200 JSON
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      placeholder: 实际显示的错误、HTTP 状态码、控制台报错（记得打码 Key）
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: 浏览器与系统
+      placeholder: "Chrome 131 / Windows 11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志 / 截图（可选）
+      description: 请先给 API Key、UUID、数据库地址打码
+      render: shell
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 确认
+      options:
+        - label: 我已经搜索过已有的 Issue
+          required: true
+        - label: 我没有在内容中粘贴任何 API Key / 数据库密钥 / .env
+          required: true

@@ -34,6 +34,7 @@
 - [常见问题](#-常见问题)
 - [免责声明](#-免责声明)
 - [贡献指南](#-贡献指南)
+- [发布到 GitHub](#-发布到-github)
 - [License](#-license)
 
 ## 🍚 这是什么
@@ -288,6 +289,11 @@ Base URL 就是你的 Vercel 域名。所有响应都是 JSON；CORS 允许任�
 
 ```text
 bigfatfish-riceeater/
+├── .github/
+│   ├── workflows/ci.yml           # Actions：语法检查 + 27 项逻辑测试
+│   ├── ISSUE_TEMPLATE/            # Bug / 功能建议模板
+│   ├── pull_request_template.md
+│   └── dependabot.yml
 ├── extension/                     # Chrome MV3 扩展，直接加载这个目录
 │   ├── manifest.json              # MV3 清单：storage / alarms 权限与 host_permissions 白名单
 │   ├── popup.html                 # 主界面 + 成就墙 + 干饭榜 + 设置（内联 CSS）
@@ -316,17 +322,25 @@ bigfatfish-riceeater/
 ├── tests/
 │   └── logic.test.js              # 纯逻辑单元测试，node tests/logic.test.js
 ├── scripts/
-│   └── make_icons.py              # 生成扩展图标的脚本
+│   ├── make_icons.py              # 生成扩展图标
+│   └── make_social_preview.py     # 生成 GitHub 社交预览图
 ├── docs/
 │   ├── SPEC.md                    # 开发契约，接口与行为的唯一事实来源
+│   ├── PUBLISH_TO_GITHUB.md       # 发布到 GitHub 的完整操作手册
+│   ├── RELEASE_NOTES_v1.1.0.md    # Release 文案模板
+│   ├── social-preview.png         # 1280×640 社交预览图
 │   ├── screenshot-main.png
 │   ├── screenshot-achievements.png
 │   └── screenshot-rank.png
-├── package.json                   # 后端依赖与 test 脚本
-├── vercel.json                    # Serverless 函数超时配置
 ├── .env.example                   # 服务端环境变量示例
 ├── .gitattributes                 # 统一 LF 换行、标记二进制资源
 ├── .gitignore
+├── CONTRIBUTING.md                # 贡献指南
+├── CODE_OF_CONDUCT.md             # 行为准则
+├── SECURITY.md                    # 漏洞报告流程
+├── CHANGELOG.md                   # 版本变更记录
+├── package.json                   # 后端依赖与 test 脚本
+├── vercel.json                    # Serverless 函数超时配置
 ├── README.md
 └── LICENSE
 ```
@@ -424,6 +438,8 @@ API Key 无效、过期或没有余额查询权限。去 DeepSeek 开放平台�
 
 ## 🤝 贡献指南
 
+完整流程见 [CONTRIBUTING.md](CONTRIBUTING.md)；安全问题请按 [SECURITY.md](SECURITY.md) 私下报告；参与本项目即表示同意 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。第一次发布到 GitHub 可以照着 [docs/PUBLISH_TO_GITHUB.md](docs/PUBLISH_TO_GITHUB.md) 做。
+
 - 先读 `docs/SPEC.md`，接口、存储结构、成就判定都以它为准；改动行为时请同步更新 SPEC 和 README。
 - Bug 和小改动直接提 PR；大改动先开 Issue 聊聊，避免白干。
 - 跑一遍 `npm test`，扩展相关的改动至少手动在 `chrome://extensions` 里加载验证一次。
@@ -431,6 +447,17 @@ API Key 无效、过期或没有余额查询权限。去 DeepSeek 开放平台�
 - 新增成就请改 `extension/shared.js` 的 `ACHIEVEMENTS`，并同步 README 成就表；成就 ID 一旦发布不要改。
 - 不要提交任何密钥、`.env`、`node_modules`、`.vercel` 目录。
 - 提交信息写清楚「改了什么、为什么改」，中英文都行。
+
+## 🚀 发布到 GitHub
+
+仓库已经包含 CI、Issue / PR 模板、贡献指南、安全策略、变更记录和 1280×640 社交预览图。第一次发布可以照着 [docs/PUBLISH_TO_GITHUB.md](docs/PUBLISH_TO_GITHUB.md) 操作，里面有：
+
+- 推送到 GitHub 的完整命令
+- 仓库 About 的中英文描述与 Topics 列表
+- v1.1.0 Release 文案（[docs/RELEASE_NOTES_v1.1.0.md](docs/RELEASE_NOTES_v1.1.0.md)）
+- GitHub Actions / 安全设置 / 素材授权注意事项
+
+发布前最重要的一句：**当前形象是社区二创素材，公开仓库前请先确认授权，否则建议先保持 Private 或替换素材。**
 
 ## 📄 License
 
