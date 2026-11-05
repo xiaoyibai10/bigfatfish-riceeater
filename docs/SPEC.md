@@ -20,9 +20,11 @@ bigfatfish-riceeater/
 │   ├── shared.js                  # 共享核心逻辑（Lead 实现，其他人只读）
 │   ├── background.js              # Service Worker + chrome.alarms
 │   ├── assets/
-│   │   └── fish.svg               # 「大肥鱼端饭碗」SVG
+│   │   ├── deepseek-chibi.webp        # 完整立绘：主界面展示
+│   │   ├── deepseek-chibi-avatar.webp # 圆形头像：Header / 图标输入
+│   │   └── ATTRIBUTION.md             # 素材来源与授权说明
 │   └── icons/
-│       ├── icon16.png             # Lead 生成
+│       ├── icon16.png                 # 由头像生成
 │       ├── icon32.png
 │       ├── icon48.png
 │       └── icon128.png
@@ -318,14 +320,14 @@ create table if not exists public.rankings (
 
 - 固定宽度 **380px**，最小高度 560px，最大高度 600px；
 - 主色 `#4D6BFE`，Q 版萌系；浅蓝渐变背景 + 白色圆角卡片 + 轻阴影；深色文字 `#1F2A44`；辅助色 `#FFB84D`（米饭黄）；
-- 结构：Header（鱼 logo + 标题 + 设置齿轮）→ Tab 栏（🍚 干饭 / 🏆 成就墙 / 🐟 干饭榜）→ 三个 panel → Toast 容器；
+- 结构：Header（圆形头像 + 标题 + 设置齿轮）→ Tab 栏（🍚 干饭 / 🏆 成就墙 / 🐟 干饭榜）→ 三个 panel → Toast 容器；
 - Header 右上角状态圆点（已配置/未配置/请求中）；
 - 动画：鱼上下浮动、按钮按压、Toast 弹入 + emoji 放大、成就卡片解锁高亮；
 - 必须包含 `prefers-reduced-motion` 降级。
 
 ### 7.3 主界面（干饭 panel）
 
-1. `assets/fish.svg` 大图（约 220×160），下方气泡文案；
+1. `assets/deepseek-chibi.webp` 立绘（185px 高的半身裁切，object-fit: cover + 底部渐隐），下方气泡文案；Header 使用 `deepseek-chibi-avatar.webp` 圆形头像；
 2. 两张大数字卡片：「今日干饭量」`X 碗`、「当前余额」`X.XX 元`；
 3. 次级信息：累计干饭 `X 碗`、连续干饭 `X 天`、上次更新 `HH:mm:ss`；
 4. 主按钮「🍚 再吃一口（刷新）」；请求中禁用 + 文案「干饭中…」；成功后按钮旁/下方出现本次战果 `本次干了 X 碗`；
@@ -354,7 +356,7 @@ create table if not exists public.rankings (
 - 顶部说明「匿名参榜 · 只上传昵称与白饭数」+ 刷新按钮；
 - 前三名特殊配色（金/银/铜）；
 - 每行：名次、昵称（过长省略号）、`X 碗`；自己高亮并标「我」；
-- 「我的排名」卡片固定底部：未上榜显示「还没上榜，去主界面吃一口」；
+- 「我的排名」卡片显示在榜单上方，未上榜显示「还没上榜，去主界面吃一口」；
 - 空榜/失败态、loading 骨架都要有；
 - 首次进入该 Tab 自动加载，缓存 60 秒内不重复请求（`BFF.loadRankCache` 可选，直接用 `BFF.refreshRank` 即可）。
 
@@ -379,18 +381,19 @@ create table if not exists public.rankings (
 - `storage.onChanged`：设置或 state 变化时更新 action badge（今日白饭碗数，整数，最高显示 `99+`；蓝色 `#4D6BFE` 背景、白字）；
 - 所有异常 `console.warn` 中文日志，绝不抛出未捕获异常导致 SW 崩溃。
 
-### 7.9 fish.svg
+### 7.9 形象素材（v1.1.0 起）
 
-- 纯手写 SVG（无外部引用、无 base64 位图），viewBox 建议 `0 0 240 180`；
-- 内容：一只圆滚滚的蓝色大肥鱼（DeepSeek 蓝 `#4D6BFE` + 深蓝描边），双手/鱼鳍端着一碗白饭（白碗 + 米粒 + 筷子），有腮红、呆萌眼睛；
-- 细节用渐变/高光，线条圆润，`stroke-linejoin="round"`；文件内可含 `<title>大肥鱼端饭碗</title>`；
-- 作为扩展 logo 与主界面展示（`<img src="assets/fish.svg">`），必须能独立打开显示。
+- 主界面：`extension/assets/deepseek-chibi.webp`（941 × 1672 WebP，社区二创「大肥鱼娘」立绘）；
+- Header 头像：`extension/assets/deepseek-chibi-avatar.webp`（640 × 640 WebP，由立绘裁切，裁切区域 x=160, y=40, 640×640）；
+- 扩展图标：`scripts/make_icons.py` 用 Pillow 以头像为输入，生成 DeepSeek 蓝圆角底 + 圆形头像的 16/32/48/128 PNG；
+- 素材来源、获取日期与授权状态见 `extension/assets/ATTRIBUTION.md`：**图片不适用仓库的 MIT 代码许可**，商用/再分发前需自行确认授权；
+- 不再使用任何外部 SVG 吉祥物；页面中不得出现远程图片或 base64 大图。
 
 ## 8. README / 开源文件
 
 - README 风格：幽默、带梗、赛博打工人语气，但信息完整；必须包含：
   banner 标题 + 一句话简介 + 徽章（Chrome MV3 / Vercel / Supabase / MIT）、
-  目录、功能特性（配 emoji）、成就表（16 个）、截图位（`docs/screenshot.png`，若暂无则用 fish.svg）、
+  目录、功能特性（配 emoji）、成就表（16 个）、截图位（`docs/screenshot-main.png` 等三张真实截图）、
   快速开始（① Supabase 建表 ② Vercel 部署 ③ 加载扩展 ④ 填写 Key）、
   环境变量表、API 文档、项目结构、防作弊说明、隐私说明、常见问题（余额为什么没变 / 401 / 排行榜不动 / 自定义后端域名）、
   免责声明（非 DeepSeek 官方、API Key 仅存本地、排行榜公开昵称请勿使用真名）、License、贡献指南。

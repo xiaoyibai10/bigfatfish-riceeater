@@ -30,6 +30,7 @@
 - [项目结构](#-项目结构)
 - [防作弊设计](#-防作弊设计)
 - [隐私说明](#-隐私说明)
+- [形象素材](#-形象素材)
 - [常见问题](#-常见问题)
 - [免责声明](#-免责声明)
 - [贡献指南](#-贡献指南)
@@ -65,7 +66,7 @@
 
 ![主界面](docs/screenshot-main.png)
 
-> 今日 126.4 碗，余额 86.42 元，连续干饭 7 天。大肥鱼端着碗的样子，像极了月底盯着工资条的你。
+> 今日 126.4 碗，余额 86.42 元，连续干饭 7 天。这位蓝发、鲸鱼尾巴的大肥鱼娘，像极了月底盯着工资条的你。
 
 ### 成就墙：已解锁的都得摆出来
 
@@ -294,7 +295,9 @@ bigfatfish-riceeater/
 │   ├── shared.js                  # 共享核心逻辑：换算、成就、存储、网络、刷新编排
 │   ├── background.js              # Service Worker：chrome.alarms、角标、消息处理
 │   ├── assets/
-│   │   └── fish.svg               # 手写「大肥鱼端饭碗」SVG
+│   │   ├── deepseek-chibi.webp       # 完整立绘：Popup 主界面形象
+│   │   ├── deepseek-chibi-avatar.webp# Header 圆形头像（立绘裁切）
+│   │   └── ATTRIBUTION.md            # 形象素材来源与授权说明
 │   └── icons/
 │       ├── icon16.png
 │       ├── icon32.png
@@ -347,6 +350,24 @@ bigfatfish-riceeater/
 - **可随时清空**：设置页有「清空本地数据（危险）」，会移除设置、状态、成就、榜单缓存；卸载扩展时 Chrome 也会清掉本地存储，下次安装会生成新的 UUID。
 - **昵称请勿用真名**：排行榜是公开的，默认值「匿名肥鱼」就挺好。
 
+## 🎨 形象素材
+
+当前 Popup 里的「大肥鱼娘」是使用者指定替换的社区二创形象（蓝发、鲸鱼尾巴、女仆装），不是手绘 SVG，也不属于 DeepSeek 官方素材。
+
+<p align="center">
+  <img src="extension/assets/deepseek-chibi.webp" width="180" alt="大肥鱼娘完整立绘">
+</p>
+
+| 文件 | 用途 | 说明 |
+| --- | --- | --- |
+| `extension/assets/deepseek-chibi.webp` | Popup 主界面立绘 | 941 × 1672 WebP，原始素材 |
+| `extension/assets/deepseek-chibi-avatar.webp` | Header 圆形头像、图标输入 | 640 × 640 WebP，由立绘裁切 |
+| `extension/assets/ATTRIBUTION.md` | 来源与授权说明 | 详见该文件 |
+
+- 原始来源：<https://fisharchive.cc/character-art/v1/download/deepseek-chibi.webp>，获取于 2026-11-05。
+- **授权提示**：仓库没有从来源页确认到明确的再分发许可，因此这张图**不适用**根目录的 MIT 代码许可，版权归原作者 / 来源平台所有；商用、二次分发或衍生作品前请自行取得授权。
+- 如果你是该素材的权利人并希望本项目替换或下架，请直接开 Issue，我们会尽快处理。
+
 ## ❓ 常见问题
 
 ### 刷新了，余额和今日白饭为什么没变？
@@ -394,7 +415,7 @@ API Key 无效、过期或没有余额查询权限。去 DeepSeek 开放平台�
 ## 📜 免责声明
 
 - 本项目**不是 DeepSeek 官方项目**，与 DeepSeek 官方没有任何隶属或合作关系；「DeepSeek Logo 像大肥鱼」只是社区玩梗。
-- 项目中的鱼形象为手写 SVG，不使用 DeepSeek 官方素材；DeepSeek 名称及相关商标归其权利人所有。
+- 形象素材来自 [fisharchive.cc](https://fisharchive.cc/character-art/v1/download/deepseek-chibi.webp)（由使用者指定替换），**不是 DeepSeek 官方素材**；代码采用 MIT，但图片素材不包含在 MIT 授权范围内，商用/再分发前请自行确认授权。DeepSeek 名称及相关商标归其权利人所有。
 - 「0.1 元 = 1 碗白饭」是虚构的趣味换算，不代表真实价格，也不涉及任何真实交易。
 - 排行榜昵称是公开可见的，**请勿使用真实姓名、手机号、邮箱或其他个人信息**；因昵称泄露造成的后果由使用者自行承担。
 - API 调用产生的费用由使用者自行承担；本项目不代管、不代付、不报销。

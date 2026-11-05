@@ -11,7 +11,7 @@
     1. 固定 380px 宽，高度 580px（落在 SPEC 要求的 560–600px 区间内），
        内容超出时只让中间的 .main 区域滚动，Header 与 Tab 栏保持稳定。
     2. 全部样式内联在这里，不引用任何外部字体、图标库或框架；
-       所有图标一律使用 emoji，鱼 logo 使用本地 assets/fish.svg。
+       所有图标一律使用 emoji，Header 头像使用本地 assets/deepseek-chibi-avatar.webp。
     3. 主色 DeepSeek 蓝 #4D6BFE，浅蓝渐变背景 + 白色圆角卡片 + 轻阴影，
        辅助色 #FFB84D（米饭黄），正文深色 #1F2A44。
     4. 所有动画（鱼浮动、Toast 弹入、emoji 放大、解锁高亮）都在
@@ -100,9 +100,14 @@
 
     .brand-logo {
       flex: none;
-      width: 40px;
-      height: 30px;
-      filter: drop-shadow(0 3px 5px rgba(77, 107, 254, 0.24));
+      width: 38px;
+      height: 38px;
+      object-fit: cover;
+      object-position: 50% 42%;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.95);
+      background: var(--white);
+      box-shadow: 0 3px 9px rgba(77, 107, 254, 0.24);
     }
 
     .brand-text {
@@ -393,19 +398,35 @@
     }
 
     .fish-wrap {
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      height: 172px;
+      position: relative;
+      height: 185px;
       overflow: hidden;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.98) 0%, rgba(244, 248, 255, 0.82) 54%, rgba(226, 235, 255, 0.45) 100%);
+    }
+
+    /* 底部渐隐，避免人物被硬切一刀 */
+    .fish-wrap::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 34px;
+      background: linear-gradient(180deg, rgba(247, 250, 255, 0) 0%, #F7FAFF 86%);
+      pointer-events: none;
     }
 
     .hero-fish {
-      width: 220px;
-      height: 165px;
-      object-fit: contain;
+      display: block;
+      width: 100%;
+      height: 205px;
+      margin-top: -10px;
+      object-fit: cover;
+      object-position: 50% 8%;
       animation: fishFloat 3.8s ease-in-out infinite;
-      filter: drop-shadow(0 8px 12px rgba(77, 107, 254, 0.16));
+      mix-blend-mode: multiply;
       user-select: none;
       -webkit-user-drag: none;
     }
@@ -816,13 +837,11 @@
     }
 
     .my-rank {
-      position: sticky;
-      bottom: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      margin-top: 10px;
+      margin-bottom: 10px;
       padding: 11px 14px;
       background: linear-gradient(135deg, #FFFFFF 0%, #F1F6FF 100%);
       border: 1.5px solid rgba(77, 107, 254, 0.30);
@@ -1342,10 +1361,10 @@
 </head>
 <body>
   <div class="app">
-    <!-- ===== Header：鱼 logo + 标题 + 状态圆点 + 设置齿轮 ===== -->
+    <!-- ===== Header：大肥鱼娘头像 + 标题 + 状态圆点 + 设置齿轮 ===== -->
     <header class="header">
       <div class="brand">
-        <img class="brand-logo" src="assets/fish.svg" alt="大肥鱼 logo" width="40" height="30">
+        <img class="brand-logo" src="assets/deepseek-chibi-avatar.webp" alt="大肥鱼娘头像" width="38" height="38">
         <div class="brand-text">
           <h1>大肥鱼的白饭日记</h1>
           <p>0.1 元 = 1 碗白饭</p>
@@ -1381,7 +1400,7 @@
 
         <div class="hero card">
           <div class="fish-wrap">
-            <img id="heroFish" class="hero-fish" src="assets/fish.svg" alt="大肥鱼端着一碗白饭" width="220" height="165">
+            <img id="heroFish" class="hero-fish" src="assets/deepseek-chibi.webp" alt="大肥鱼娘" width="352" height="210">
           </div>
           <p id="fishBubble" class="fish-bubble">今天也要好好干饭哦～</p>
         </div>
@@ -1441,11 +1460,11 @@
           <button id="rankRefreshBtn" class="btn btn-ghost btn-sm" type="button">🔄 刷新</button>
         </div>
         <div id="rankUpdated" class="rank-updated"></div>
-        <div id="rankBody"></div>
         <div id="myRankCard" class="card my-rank">
           <div class="my-rank-title">我的排名<strong id="myRankText">--</strong></div>
           <div id="myRankValue" class="my-rank-value">--</div>
         </div>
+        <div id="rankBody"></div>
       </section>
 
       <!-- ===== 设置面板（由齿轮打开，不属于 Tab） ===== -->
