@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大肥鱼的白饭日记</title>
+  <!--
+    大肥鱼的白饭日记 · Popup 主界面
+    ------------------------------------------------------------------
+    设计约定：
+    1. 固定 380px 宽，高度 580px（落在 SPEC 要求的 560–600px 区间内），
+       内容超出时只让中间的 .main 区域滚动，Header 与 Tab 栏保持稳定。
+    2. 全部样式内联在这里，不引用任何外部字体、图标库或框架；
+       所有图标一律使用 emoji，鱼 logo 使用本地 assets/fish.svg。
+    3. 主色 DeepSeek 蓝 #4D6BFE，浅蓝渐变背景 + 白色圆角卡片 + 轻阴影，
+       辅助色 #FFB84D（米饭黄），正文深色 #1F2A44。
+    4. 所有动画（鱼浮动、Toast 弹入、emoji 放大、解锁高亮）都在
+       prefers-reduced-motion: reduce 时整体降级为无动画。
+  -->
+  <style>
+    /* ================= 基础与布局 ================= */
+    :root {
+      --blue: #4D6BFE;
+      --blue-deep: #3A54D4;
+      --blue-soft: #EEF3FF;
+      --blue-line: #DCE6FF;
+      --yellow: #FFB84D;
+      --ink: #1F2A44;
+      --ink-soft: #5A6886;
+      --ink-muted: #98A2BD;
+      --white: #FFFFFF;
+      --danger: #D14343;
+      --danger-soft: #FFF3F3;
+      --green: #27C281;
+      --shadow-card: 0 6px 18px rgba(31, 42, 68, 0.07);
+      --radius-card: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      width: 380px;
+    }
+
+    body {
+      width: 380px;
+      height: 580px;
+      min-height: 560px;
+      max-height: 600px;
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Noto Sans CJK SC", system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      background:
+        radial-gradient(circle at 12% 6%, rgba(77, 107, 254, 0.16), transparent 42%),
+        radial-gradient(circle at 92% 0%, rgba(255, 184, 77, 0.18), transparent 36%),
+        linear-gradient(160deg, #F4F8FF 0%, #E4ECFF 52%, #F7FAFF 100%);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* ================= Header ================= */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px 16px 10px;
+      background: rgba(255, 255, 255, 0.72);
+      border-bottom: 1px solid rgba(77, 107, 254, 0.10);
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      flex: none;
+      width: 40px;
+      height: 30px;
+      filter: drop-shadow(0 3px 5px rgba(77, 107, 254, 0.24));
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .brand-text h1 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      color: var(--blue);
+      white-space: nowrap;
+    }
+
+    .brand-text p {
+      margin: 1px 0 0;
+      font-size: 10px;
+      color: var(--ink-muted);
+      white-space: nowrap;
+    }
+
+    .header-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: none;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--yellow);
+      box-shadow: 0 0 0 3px rgba(255, 184, 77, 0.18);
+      transition: background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .status-dot.configured {
+      background: var(--green);
+      box-shadow: 0 0 0 3px rgba(39, 194, 129, 0.18);
+    }
+
+    .status-dot.loading {
+      background: var(--blue);
+      box-shadow: 0 0 0 3px rgba(77, 107, 254, 0.20);
+      animation: statusPulse 1s ease-in-out infinite;
+    }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 1px solid var(--blue-line);
+      border-radius: 10px;
+      background: var(--white);
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1;
+      transition: background 0.15s ease, transform 0.12s ease, border-color 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--blue-soft);
+      border-color: rgba(77, 107, 254, 0.30);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* ================= Tab 栏 ================= */
+    .tabbar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      margin: 10px 14px 2px;
+      padding: 4px;
+      border: 1px solid rgba(77, 107, 254, 0.10);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.76);
+      box-shadow: 0 4px 12px rgba(31, 42, 68, 0.05);
+    }
+
+    .tab {
+      padding: 7px 4px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--ink-soft);
+      font-size: 12.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background 0.18s ease, color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+    }
+
+    .tab:hover {
+      color: var(--blue);
+      background: rgba(77, 107, 254, 0.07);
+    }
+
+    .tab:active {
+      transform: scale(0.96);
+    }
+
+    .tab.active {
+      color: var(--white);
+      background: linear-gradient(135deg, #5B78FF 0%, #4D6BFE 55%, #425EEA 100%);
+      box-shadow: 0 4px 10px rgba(77, 107, 254, 0.30);
+    }
+
+    /* ================= 主滚动区 ================= */
+    .main {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 12px 14px 18px;
+      scrollbar-width: thin;
+      scrollbar-color: #C9D5F2 transparent;
+    }
+
+    .main::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .main::-webkit-scrollbar-thumb {
+      background: #C9D5F2;
+      border-radius: 3px;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+      animation: panelIn 0.26s ease both;
+    }
+
+    .card {
+      border: 1px solid rgba(77, 107, 254, 0.10);
+      border-radius: var(--radius-card);
+      background: var(--white);
+      box-shadow: var(--shadow-card);
+    }
+
+    /* ================= 通用按钮 ================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 11px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      transition: transform 0.12s ease, box-shadow 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.68;
+      transform: none;
+    }
+
+    .btn-primary {
+      color: var(--white);
+      background: linear-gradient(135deg, #6180FF 0%, #4D6BFE 52%, #4059DA 100%);
+      box-shadow: 0 8px 18px rgba(77, 107, 254, 0.28);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 10px 22px rgba(77, 107, 254, 0.36);
+    }
+
+    .btn-ghost {
+      color: var(--blue);
+      background: var(--white);
+      border: 1.5px solid var(--blue-line);
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      background: var(--blue-soft);
+      border-color: rgba(77, 107, 254, 0.34);
+    }
+
+    .btn-danger {
+      color: var(--danger);
+      background: var(--danger-soft);
+      border: 1.5px solid #FFD4D4;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #FFE9E9;
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 11px;
+      border-radius: 9px;
+    }
+
+    /* ================= 首页：干饭 ================= */
+    .guide-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 12px;
+      padding: 18px 16px 16px;
+      text-align: center;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F3F7FF 100%);
+      border: 1.5px dashed rgba(77, 107, 254, 0.36);
+    }
+
+    .guide-emoji {
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .guide-card h2 {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: var(--ink);
+    }
+
+    .guide-card p {
+      margin: 0 0 8px;
+      font-size: 11.5px;
+      color: var(--ink-muted);
+    }
+
+    .guide-card .btn {
+      min-width: 140px;
+    }
+
+    .error-bar {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 9px 10px;
+      border: 1px solid #FFD6D6;
+      border-radius: 11px;
+      background: var(--danger-soft);
+      color: #B93A3A;
+      font-size: 11.5px;
+      line-height: 1.45;
+      animation: shakeIn 0.3s ease both;
+    }
+
+    .error-text {
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .error-close {
+      flex: none;
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: #B93A3A;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .error-close:hover {
+      background: rgba(185, 58, 58, 0.10);
+    }
+
+    .hero {
+      padding: 4px 12px 12px;
+      text-align: center;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F7FAFF 100%);
+    }
+
+    .fish-wrap {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      height: 172px;
+      overflow: hidden;
+    }
+
+    .hero-fish {
+      width: 220px;
+      height: 165px;
+      object-fit: contain;
+      animation: fishFloat 3.8s ease-in-out infinite;
+      filter: drop-shadow(0 8px 12px rgba(77, 107, 254, 0.16));
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .fish-bubble {
+      display: inline-block;
+      max-width: 100%;
+      margin: -4px auto 0;
+      padding: 5px 12px;
+      border: 1px solid var(--blue-line);
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: #3D4C7C;
+      font-size: 11.5px;
+      line-height: 1.4;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stat-card {
+      padding: 12px 13px 11px;
+      border-radius: var(--radius-card);
+      background: var(--white);
+      border: 1px solid rgba(77, 107, 254, 0.10);
+      box-shadow: var(--shadow-card);
+    }
+
+    .stat-card.stat-primary {
+      color: var(--white);
+      background: linear-gradient(140deg, #6783FF 0%, #4D6BFE 55%, #3B55D6 100%);
+      border-color: transparent;
+      box-shadow: 0 8px 20px rgba(77, 107, 254, 0.28);
+    }
+
+    .stat-label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      letter-spacing: 0.2px;
+    }
+
+    .stat-primary .stat-label {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .stat-value {
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+      margin-top: 3px;
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.15;
+      font-variant-numeric: tabular-nums;
+      color: var(--blue);
+      word-break: break-all;
+    }
+
+    .stat-primary .stat-value {
+      color: var(--white);
+    }
+
+    .stat-unit {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-muted);
+    }
+
+    .stat-primary .stat-unit {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .meta-row {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 12px;
+      padding: 10px 6px;
+    }
+
+    .meta-item {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      border-right: 1px dashed #E7EDFB;
+    }
+
+    .meta-item:last-child {
+      border-right: none;
+    }
+
+    .meta-label {
+      font-size: 10px;
+      color: var(--ink-muted);
+    }
+
+    .meta-value {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .meta-value .unit {
+      font-size: 9.5px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      margin-left: 1px;
+    }
+
+    .action-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .btn-refresh {
+      width: 100%;
+      height: 46px;
+      font-size: 14.5px;
+    }
+
+    .last-gain {
+      margin: 0;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 184, 77, 0.16);
+      color: #9A6100;
+      font-size: 11px;
+      animation: gainIn 0.35s ease both;
+    }
+
+    /* ================= 成就墙 ================= */
+    .ach-summary {
+      padding: 13px 14px 14px;
+    }
+
+    .ach-summary-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 11.5px;
+      color: var(--ink-muted);
+    }
+
+    .ach-summary-top strong {
+      font-size: 13px;
+      color: var(--blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #E7EDFC;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #7C93FF 0%, #4D6BFE 60%, #FFB84D 100%);
+      transition: width 0.45s ease;
+    }
+
+    .ach-group {
+      margin-top: 14px;
+    }
+
+    .ach-group-title {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 0 2px 7px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #40507B;
+    }
+
+    .ach-group-count {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--ink-muted);
+    }
+
+    .ach-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .ach-card {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-height: 118px;
+      padding: 10px;
+      border: 1.5px solid #E7EDFB;
+      border-radius: 14px;
+      background: #F8FAFF;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+
+    .ach-card.unlocked {
+      border-color: var(--blue);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(77, 107, 254, 0.07), 0 6px 14px rgba(77, 107, 254, 0.10);
+    }
+
+    .ach-card.unlocked:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 3px rgba(77, 107, 254, 0.10), 0 10px 18px rgba(77, 107, 254, 0.16);
+    }
+
+    .ach-card.locked {
+      color: #9AA5C0;
+    }
+
+    .ach-card.locked .ach-emoji {
+      filter: grayscale(1);
+      opacity: 0.68;
+    }
+
+    .ach-emoji {
+      font-size: 23px;
+      line-height: 1.1;
+    }
+
+    .ach-name {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ach-card.locked .ach-name {
+      color: #8D98B4;
+      letter-spacing: 1px;
+    }
+
+    .ach-desc {
+      flex: 1;
+      font-size: 10px;
+      line-height: 1.45;
+      color: #6B7899;
+      word-break: break-word;
+    }
+
+    .ach-card.locked .ach-desc {
+      color: #A9B3CB;
+    }
+
+    .ach-condition {
+      margin-top: 2px;
+      font-size: 9.5px;
+      line-height: 1.35;
+      color: #A6B1CA;
+    }
+
+    .ach-date {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .ach-card.unlock-flash {
+      animation: unlockGlow 1.6s ease both;
+    }
+
+    /* ================= 排行榜 ================= */
+    .rank-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 7px;
+    }
+
+    .rank-note {
+      margin: 0;
+      font-size: 10.5px;
+      color: var(--ink-muted);
+    }
+
+    .rank-updated {
+      min-height: 14px;
+      margin-bottom: 7px;
+      font-size: 10px;
+      color: var(--ink-muted);
+    }
+
+    .rank-list {
+      padding: 4px 8px;
+      border-radius: var(--radius-card);
+    }
+
+    .rank-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 4px;
+      border-bottom: 1px dashed #EDF1FC;
+      font-size: 12px;
+    }
+
+    .rank-row:last-child {
+      border-bottom: none;
+    }
+
+    .rank-no {
+      flex: none;
+      width: 30px;
+      text-align: center;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #8B97B5;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rank-name {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+      color: var(--ink);
+    }
+
+    .rank-name-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .rank-me-tag {
+      flex: none;
+      margin-left: 2px;
+      padding: 0 5px;
+      border-radius: 6px;
+      background: var(--blue);
+      color: var(--white);
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 15px;
+      vertical-align: 1px;
+    }
+
+    .rank-rice {
+      flex: none;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rank-row.rank-top-1 {
+      background: linear-gradient(90deg, rgba(255, 213, 110, 0.22), rgba(255, 246, 222, 0.12));
+      border-radius: 10px;
+      border-bottom-color: transparent;
+    }
+
+    .rank-row.rank-top-1 .rank-no {
+      color: #C48700;
+    }
+
+    .rank-row.rank-top-2 {
+      background: linear-gradient(90deg, rgba(176, 190, 214, 0.22), rgba(243, 246, 250, 0.12));
+      border-radius: 10px;
+      border-bottom-color: transparent;
+    }
+
+    .rank-row.rank-top-2 .rank-no {
+      color: #7E8CA6;
+    }
+
+    .rank-row.rank-top-3 {
+      background: linear-gradient(90deg, rgba(235, 168, 116, 0.22), rgba(253, 240, 228, 0.12));
+      border-radius: 10px;
+      border-bottom-color: transparent;
+    }
+
+    .rank-row.rank-top-3 .rank-no {
+      color: #B06B34;
+    }
+
+    .rank-row.rank-me {
+      border-radius: 10px;
+      background: #EEF2FF;
+      box-shadow: inset 0 0 0 1.5px var(--blue);
+    }
+
+    .my-rank {
+      position: sticky;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 11px 14px;
+      background: linear-gradient(135deg, #FFFFFF 0%, #F1F6FF 100%);
+      border: 1.5px solid rgba(77, 107, 254, 0.30);
+    }
+
+    .my-rank-title {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--ink-muted);
+    }
+
+    .my-rank-title strong {
+      font-size: 12.5px;
+      color: var(--ink);
+    }
+
+    .my-rank-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .my-rank-value small {
+      font-size: 10px;
+      color: var(--ink-muted);
+      font-weight: 600;
+    }
+
+    .my-rank-empty {
+      font-size: 11px;
+      color: var(--ink-muted);
+    }
+
+    .state-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 26px 16px;
+      text-align: center;
+    }
+
+    .state-emoji {
+      font-size: 27px;
+      line-height: 1.1;
+    }
+
+    .state-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .state-desc {
+      font-size: 10.5px;
+      color: var(--ink-muted);
+      word-break: break-word;
+    }
+
+    .state-card .btn {
+      margin-top: 6px;
+    }
+
+    .skeleton-list {
+      padding: 10px;
+      border-radius: var(--radius-card);
+    }
+
+    .skeleton-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 2px;
+    }
+
+    .skeleton-bar {
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #EDF1FB 25%, #F7F9FF 37%, #EDF1FB 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.3s ease infinite;
+    }
+
+    .skeleton-bar.rank {
+      width: 22px;
+    }
+
+    .skeleton-bar.name {
+      flex: 1;
+    }
+
+    .skeleton-bar.rice {
+      width: 48px;
+    }
+
+    /* ================= 设置 ================= */
+    .settings-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .settings-head h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .settings-card {
+      padding: 14px;
+    }
+
+    .settings-card + .settings-card {
+      margin-top: 10px;
+    }
+
+    .field-label {
+      display: block;
+      margin: 12px 0 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #40507B;
+    }
+
+    .field-label:first-child {
+      margin-top: 0;
+    }
+
+    .input {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1.5px solid #E1E8F8;
+      border-radius: 10px;
+      background-color: #FBFCFE;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 12px;
+      line-height: 1.4;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .input::placeholder {
+      color: #B3BDD4;
+    }
+
+    .input:focus {
+      border-color: var(--blue);
+      background-color: var(--white);
+      box-shadow: 0 0 0 3px rgba(77, 107, 254, 0.12);
+    }
+
+    .key-row,
+    .nickname-row {
+      display: flex;
+      align-items: stretch;
+      gap: 6px;
+    }
+
+    .key-row .input,
+    .nickname-row .input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .eye-btn,
+    .nickname-row .btn {
+      flex: none;
+      height: 36px;
+    }
+
+    .eye-btn {
+      width: 36px;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .field-hint {
+      margin: 5px 0 0;
+      font-size: 10px;
+      line-height: 1.45;
+      color: var(--ink-muted);
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 10px 0 2px;
+      padding: 10px 11px;
+      border: 1px solid #EDF1FB;
+      border-radius: 11px;
+      background: #FAFCFF;
+    }
+
+    .switch-row-text {
+      min-width: 0;
+    }
+
+    .switch-row-title {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .switch-row .field-hint {
+      margin-top: 2px;
+    }
+
+    .switch {
+      position: relative;
+      flex: none;
+      width: 42px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .switch input {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #D8DFF2;
+      transition: background 0.2s ease;
+    }
+
+    .slider::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--white);
+      box-shadow: 0 2px 5px rgba(31, 42, 68, 0.22);
+      transition: transform 0.2s ease;
+    }
+
+    .switch input:checked + .slider {
+      background: var(--blue);
+    }
+
+    .switch input:checked + .slider::after {
+      transform: translateX(18px);
+    }
+
+    .switch input:focus-visible + .slider {
+      box-shadow: 0 0 0 3px rgba(77, 107, 254, 0.20);
+    }
+
+    .select {
+      appearance: none;
+      -webkit-appearance: none;
+      padding-right: 30px;
+      background-image: linear-gradient(45deg, transparent 50%, #7C89AA 50%), linear-gradient(135deg, #7C89AA 50%, transparent 50%);
+      background-position: calc(100% - 16px) 16px, calc(100% - 11px) 16px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+
+    .settings-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .settings-actions .btn {
+      width: 100%;
+      height: 42px;
+    }
+
+    .test-result {
+      margin: 0;
+      padding: 8px 11px;
+      border-radius: 10px;
+      background: #EFF7FF;
+      color: #2D5BA8;
+      font-size: 11px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .test-result.is-error {
+      background: var(--danger-soft);
+      color: #B93A3A;
+    }
+
+    /* ================= Toast ================= */
+    .toast-container {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 14px;
+      z-index: 99;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 0 14px;
+      pointer-events: none;
+    }
+
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 352px;
+      padding: 10px 13px;
+      border: 1px solid var(--blue-line);
+      border-radius: 13px;
+      background: var(--white);
+      box-shadow: 0 12px 30px rgba(31, 42, 68, 0.18);
+      font-size: 12px;
+      color: var(--ink);
+      animation: toastIn 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+      pointer-events: auto;
+    }
+
+    .toast-emoji {
+      flex: none;
+      font-size: 20px;
+      line-height: 1;
+      animation: emojiPop 0.5s ease both;
+    }
+
+    .toast-body {
+      min-width: 0;
+    }
+
+    .toast-title {
+      font-weight: 800;
+      word-break: break-word;
+    }
+
+    .toast-desc {
+      margin-top: 1px;
+      font-size: 10.5px;
+      color: var(--ink-muted);
+      word-break: break-word;
+    }
+
+    .toast.achievement {
+      color: var(--white);
+      border-color: transparent;
+      background: linear-gradient(125deg, #5A78FF 0%, #4D6BFE 56%, #3E58DD 100%);
+      box-shadow: 0 14px 32px rgba(77, 107, 254, 0.36);
+    }
+
+    .toast.achievement .toast-emoji {
+      font-size: 32px;
+      animation: emojiPopBig 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.45) both;
+    }
+
+    .toast.achievement .toast-desc {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .toast.error {
+      color: #B93A3A;
+      border-color: #FFD6D6;
+      background: var(--danger-soft);
+    }
+
+    .toast.is-hiding {
+      animation: toastOut 0.24s ease forwards;
+    }
+
+    /* ================= 动画关键帧 ================= */
+    @keyframes fishFloat {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-7px);
+      }
+    }
+
+    @keyframes statusPulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.45;
+      }
+    }
+
+    @keyframes panelIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shakeIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-4px);
+      }
+      60% {
+        transform: translateX(2px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes gainIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.94);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes toastOut {
+      to {
+        opacity: 0;
+        transform: translateY(8px) scale(0.96);
+      }
+    }
+
+    @keyframes emojiPop {
+      0% {
+        transform: scale(0.5);
+      }
+      65% {
+        transform: scale(1.18);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes emojiPopBig {
+      0% {
+        transform: scale(0.2) rotate(-14deg);
+      }
+      60% {
+        transform: scale(1.35) rotate(6deg);
+      }
+      100% {
+        transform: scale(1) rotate(0);
+      }
+    }
+
+    @keyframes unlockGlow {
+      0% {
+        box-shadow: 0 0 0 0 rgba(77, 107, 254, 0.45);
+      }
+      55% {
+        box-shadow: 0 0 0 6px rgba(77, 107, 254, 0.12), 0 0 20px rgba(77, 107, 254, 0.35);
+      }
+      100% {
+        box-shadow: 0 0 0 3px rgba(77, 107, 254, 0.07), 0 6px 14px rgba(77, 107, 254, 0.10);
+      }
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0 50%;
+      }
+    }
+
+    /* ================= 动效降级 ================= */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.001ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- ===== Header：鱼 logo + 标题 + 状态圆点 + 设置齿轮 ===== -->
+    <header class="header">
+      <div class="brand">
+        <img class="brand-logo" src="assets/fish.svg" alt="大肥鱼 logo" width="40" height="30">
+        <div class="brand-text">
+          <h1>大肥鱼的白饭日记</h1>
+          <p>0.1 元 = 1 碗白饭</p>
+        </div>
+      </div>
+      <div class="header-tools">
+        <span id="statusDot" class="status-dot" title="未配置 API Key" aria-label="状态：未配置"></span>
+        <button id="settingsBtn" class="icon-btn" type="button" title="设置" aria-label="打开设置">⚙️</button>
+      </div>
+    </header>
+
+    <!-- ===== Tab 栏 ===== -->
+    <nav id="tabbar" class="tabbar" role="tablist" aria-label="功能切换">
+      <button id="tab-home" class="tab active" type="button" role="tab" aria-selected="true" aria-controls="panel-home" data-tab="home">🍚 干饭</button>
+      <button id="tab-achievements" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-achievements" data-tab="achievements">🏆 成就墙</button>
+      <button id="tab-rank" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-rank" data-tab="rank">🐟 干饭榜</button>
+    </nav>
+
+    <main class="main">
+      <!-- ===== 干饭面板 ===== -->
+      <section id="panel-home" class="panel active" role="tabpanel" aria-labelledby="tab-home">
+        <div id="noKeyCard" class="guide-card card hidden">
+          <div class="guide-emoji">🔑</div>
+          <h2>还没填 API Key</h2>
+          <p>填上你的 DeepSeek API Key，让大肥鱼开饭吧。</p>
+          <button id="goSettingsBtn" class="btn btn-primary" type="button">去填写 Key</button>
+        </div>
+
+        <div id="errorBar" class="error-bar hidden" role="alert">
+          <span id="errorText" class="error-text"></span>
+          <button id="errorClose" class="error-close" type="button" aria-label="关闭错误提示">✕</button>
+        </div>
+
+        <div class="hero card">
+          <div class="fish-wrap">
+            <img id="heroFish" class="hero-fish" src="assets/fish.svg" alt="大肥鱼端着一碗白饭" width="220" height="165">
+          </div>
+          <p id="fishBubble" class="fish-bubble">今天也要好好干饭哦～</p>
+        </div>
+
+        <div id="keyStats" class="stat-grid">
+          <div class="stat-card stat-primary">
+            <span class="stat-label">今日干饭量</span>
+            <div class="stat-value"><span id="statToday">0</span><span class="stat-unit">碗</span></div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">当前余额</span>
+            <div class="stat-value"><span id="statBalance">--</span><span class="stat-unit">元</span></div>
+          </div>
+        </div>
+
+        <div id="keyMeta" class="meta-row card">
+          <div class="meta-item">
+            <span class="meta-label">累计干饭</span>
+            <span class="meta-value"><span id="statTotal">0</span><span class="unit">碗</span></span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">连续干饭</span>
+            <span class="meta-value"><span id="statStreak">0</span><span class="unit">天</span></span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">上次更新</span>
+            <span id="statLastUpdate" class="meta-value">--:--:--</span>
+          </div>
+        </div>
+
+        <div id="keyActions" class="action-row">
+          <button id="refreshBtn" class="btn btn-primary btn-refresh" type="button">
+            <span id="refreshLabel">🍚 再吃一口（刷新）</span>
+          </button>
+          <p id="lastGain" class="last-gain hidden" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <!-- ===== 成就墙面板 ===== -->
+      <section id="panel-achievements" class="panel" role="tabpanel" aria-labelledby="tab-achievements">
+        <div class="card ach-summary">
+          <div class="ach-summary-top">
+            <span>已解锁</span>
+            <strong id="achCount">0 / 16</strong>
+          </div>
+          <div id="achProgress" class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="16" aria-valuenow="0" aria-label="成就解锁进度">
+            <div id="achProgressFill" class="progress-fill"></div>
+          </div>
+        </div>
+        <div id="achGroups" class="ach-groups"></div>
+      </section>
+
+      <!-- ===== 干饭榜面板 ===== -->
+      <section id="panel-rank" class="panel" role="tabpanel" aria-labelledby="tab-rank">
+        <div class="rank-head">
+          <p class="rank-note">匿名参榜 · 只上传昵称与白饭数</p>
+          <button id="rankRefreshBtn" class="btn btn-ghost btn-sm" type="button">🔄 刷新</button>
+        </div>
+        <div id="rankUpdated" class="rank-updated"></div>
+        <div id="rankBody"></div>
+        <div id="myRankCard" class="card my-rank">
+          <div class="my-rank-title">我的排名<strong id="myRankText">--</strong></div>
+          <div id="myRankValue" class="my-rank-value">--</div>
+        </div>
+      </section>
+
+      <!-- ===== 设置面板（由齿轮打开，不属于 Tab） ===== -->
+      <section id="panel-settings" class="panel" role="tabpanel" aria-label="设置">
+        <div class="settings-head">
+          <h2>⚙️ 设置</h2>
+          <button id="settingsBackBtn" class="btn btn-ghost btn-sm" type="button">← 返回</button>
+        </div>
+
+        <div class="card settings-card">
+          <label class="field-label" for="apiKeyInput">DeepSeek API Key</label>
+          <div class="key-row">
+            <input id="apiKeyInput" class="input" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false">
+            <button id="toggleKeyBtn" class="icon-btn eye-btn" type="button" aria-label="显示 API Key" aria-pressed="false">👁️</button>
+          </div>
+          <p class="field-hint">只保存在本机浏览器，不会上传到任何服务器。</p>
+
+          <label class="field-label" for="nicknameInput">排行榜昵称</label>
+          <div class="nickname-row">
+            <input id="nicknameInput" class="input" type="text" maxlength="20" placeholder="匿名肥鱼" autocomplete="off">
+            <button id="randomNickBtn" class="btn btn-ghost btn-sm" type="button">🎲 换一个</button>
+          </div>
+          <p class="field-hint">最多 20 个字，别用真名，注意隐私。</p>
+
+          <div class="switch-row">
+            <div class="switch-row-text">
+              <p class="switch-row-title">参与匿名排行榜</p>
+              <p class="field-hint">只上传昵称与累计白饭数。</p>
+            </div>
+            <label class="switch">
+              <input id="syncToggle" type="checkbox" aria-label="参与匿名排行榜">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <label class="field-label" for="refreshSelect">自动刷新间隔</label>
+          <select id="refreshSelect" class="input select">
+            <option value="15">15 分钟</option>
+            <option value="30">30 分钟</option>
+            <option value="60">60 分钟</option>
+            <option value="120">120 分钟</option>
+          </select>
+
+          <label class="field-label" for="apiBaseInput">后端 API 地址（高级）</label>
+          <input id="apiBaseInput" class="input" type="text" placeholder="https://bigfatfish-riceeater.vercel.app" autocomplete="off" spellcheck="false">
+          <p class="field-hint">默认值只是示例后端，请填自己部署的 Vercel 域名；保存时会自动去掉结尾的斜杠。</p>
+        </div>
+
+        <div class="settings-actions">
+          <button id="saveSettingsBtn" class="btn btn-primary" type="button">💾 保存设置</button>
+          <button id="testConnBtn" class="btn btn-ghost" type="button">🔌 测试连接</button>
+          <p id="testResult" class="test-result hidden" aria-live="polite"></p>
+          <button id="clearDataBtn" class="btn btn-danger" type="button">🗑️ 清空本地数据（危险）</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast 容器：成就解锁、错误提示、保存成功都塞这里 -->
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- 共享核心逻辑必须先加载，popup.js 只通过 globalThis.BFF 访问业务能力 -->
+  <script src="shared.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

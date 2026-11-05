@@ -1,0 +1,17 @@
+# 依赖目录
+node_modules/
+
+# 环境变量：全部忽略，但保留示例文件
+.env
+.env.*
+!.env.example
+
+# Vercel 本地元数据
+.vercel/
+
+# 日志
+*.log
+
+# 操作系统垃圾文件
+.DS_Store
+Thumbs.db
