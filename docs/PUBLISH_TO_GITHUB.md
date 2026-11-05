@@ -80,12 +80,14 @@ git push origin v1.1.0
 
 在 `bigfatfish-riceeater` 目录里执行（下面的 `xiaoyibai10` 已经按你的 GitHub 用户名填好；如果仓库名不同，同步替换）：
 
+> 先执行 `git remote -v`。如果已经能看到 `origin https://github.com/xiaoyibai10/bigfatfish-riceeater.git`，就**跳过** `git remote add`，否则会报 `remote origin already exists`。
+
 ```bash
 # 如果还没有配置 Git 身份
 git config --global user.name "你的名字"
 git config --global user.email "你的邮箱"
 
-# 关联远程仓库
+# 仅在还没有 origin 时执行；已有则跳过
 git remote add origin https://github.com/xiaoyibai10/bigfatfish-riceeater.git
 
 # 确认当前分支叫 main（GitHub 默认也是 main）
@@ -187,6 +189,65 @@ Release 页面是介绍文档的第三层：给已经安装旧版的人看“这
 - **Pin repository**：在个人主页把项目 pin 上去，增加曝光。
 
 ## 9. 常见问题
+
+### `remote origin already exists`
+
+说明 remote 已经配置过，不用再执行 `git remote add`。先看当前地址：
+
+```bash
+git remote -v
+```
+
+- 地址正确：直接 `git push -u origin main`。
+- 地址错了：`git remote set-url origin https://github.com/xiaoyibai10/bigfatfish-riceeater.git`。
+
+### `Repository not found` / 仓库 404
+
+用浏览器打开 `https://github.com/xiaoyibai10/bigfatfish-riceeater`：
+
+1. **打不开**：仓库还没创建，先去 <https://github.com/new> 新建，名称必须是 `bigfatfish-riceeater`，不要勾选初始化 README / .gitignore / License。
+2. **能打开但推送仍 404**：本地登录的 GitHub 账号不是 `xiaoyibai10`，或仓库是 Private 但当前凭据没有权限。检查 `git remote -v` 的地址、GitHub 当前登录账号和仓库可见性。
+3. **仓库名不一致**：用 `git remote set-url origin <正确地址>` 改掉，再推。
+
+也可以直接查公开 API 确认：
+
+```bash
+curl -s https://api.github.com/repos/xiaoyibai10/bigfatfish-riceeater
+```
+
+返回 `"Not Found"` 说明公开仓库不存在（Private 仓库在未认证时也会返回 Not Found）。
+
+### 仓库创建时勾了 README，推送被拒绝
+
+```bash
+git pull --rebase --allow-unrelated-histories origin main
+git push -u origin main
+```
+
+如果冲突，保留本地 README，解决后 `git add -A && git rebase --continue`。
+
+### `TLS certificate verification has been disabled!`
+
+这条警告说明 Git 全局关闭了 HTTPS 证书校验（`git config --global http.sslVerify false`）。推送时可能会弹浏览器登录，**但关闭证书校验有凭据被中间人截获的风险**。建议：
+
+```bash
+# 先确认当前的设置
+git config --show-origin --get http.sslVerify
+
+# 恢复校验（如果证书链本身有问题，恢复后会直接报 SSL 错误）
+git config --global --unset http.sslVerify
+```
+
+如果恢复后无法连接（公司代理 / 自签证书环境），更安全的做法是改用 SSH：
+
+```bash
+ssh-keygen -t ed25519 -C "你的邮箱"
+# 把 ~/.ssh/id_ed25519.pub 加到 GitHub → Settings → SSH and GPG keys
+git remote set-url origin git@github.com:xiaoyibai10/bigfatfish-riceeater.git
+git push -u origin main
+```
+
+或者使用 GitHub Desktop，不要长期关闭 HTTPS 证书校验。
 
 ### `remote: Permission denied` / `Authentication failed`
 
