@@ -10,17 +10,24 @@
 </p>
 
 <p align="center">
+  <img alt="AI Generated" src="https://img.shields.io/badge/-AI%20Generated-FF6B6B?style=flat-square">
   <img alt="Manifest V3" src="https://img.shields.io/badge/-Manifest%20V3-4D6BFE?style=flat-square&logo=googlechrome&logoColor=white">
   <img alt="Vercel" src="https://img.shields.io/badge/-Vercel-000000?style=flat-square&logo=vercel&logoColor=white">
   <img alt="Supabase" src="https://img.shields.io/badge/-Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white">
-  <img alt="MIT" src="https://img.shields.io/badge/-MIT-FFB84D?style=flat-square">
+  <img alt="MIT (code)" src="https://img.shields.io/badge/-MIT%20code-FFB84D?style=flat-square">
+  <img alt="CC BY-NC-SA 4.0 (art)" src="https://img.shields.io/badge/-CC%20BY--NC--SA%204.0-EF9421?style=flat-square&logo=creativecommons&logoColor=white">
 </p>
+
+> 🤖 **AI 生成声明**：本项目的代码、测试、文档与文案由 AI 编程助手在人工需求、审核与测试下生成/辅助生成。使用前请自行审阅，详见 [AI 生成声明](#-ai-生成声明)。
+>
+> 🎨 **形象素材**：CC BY-NC-SA 4.0（非商业、署名、相同方式共享），版权与署名见 [extension/assets/ATTRIBUTION.md](extension/assets/ATTRIBUTION.md)。
 
 > 这不是一个严肃的财务工具，这是一份赛博打工人给自己开的「干饭体检报告」。
 
 ## 📖 目录
 
 - [这是什么](#-这是什么)
+- [AI 生成声明](#-ai-生成声明)
 - [功能特性](#-功能特性)
 - [截图](#-截图)
 - [成就墙](#-成就墙)
@@ -47,6 +54,16 @@
 - 记账方式：纯本地。API Key 只存在浏览器里，插件直接请求 `api.deepseek.com` 查余额，用前后两次余额的差值算「这一口吃了多少」。
 - 排行榜：可选功能。想比一比谁是饭桶，就自己部署一个 Vercel 后端 + Supabase 数据库；不想参与，关掉开关即可，本地记账照常工作。
 - 形态：Chrome Manifest V3 原生扩展，**没有构建步骤**，`chrome://extensions` 里「加载已解压的扩展程序」就能跑。
+
+## 🤖 AI 生成声明
+
+本项目的扩展代码、Vercel API、Supabase SQL、测试、脚本、文档与文案，由 AI 编程助手在人工需求、审核与测试下生成 / 辅助生成；扩展图标由脚本从授权的二创立绘生成。
+
+维护者已经运行了 27 项逻辑测试、全量 JS 语法检查、静态资源检查和界面渲染验证，但 AI 生成内容仍可能存在错误、过时信息、安全疏漏或「一本正经地胡说八道」。请在复用前自行审阅，尤其是涉及 API Key、数据库权限、CORS、排行榜防作弊和部署配置的部分。
+
+- 本项目按「现状」提供，不附带任何担保；AI 生成内容不构成专业建议。
+- 如果你发现 AI 幻觉、代码错误或安全问题，欢迎提 Issue 或 PR。
+- 使用本项目的代码、文档或素材，即表示你理解并自行承担相应风险。
 
 ## ✨ 功能特性
 
@@ -379,8 +396,11 @@ bigfatfish-riceeater/
 | `extension/assets/ATTRIBUTION.md` | 来源与授权说明 | 详见该文件 |
 
 - 原始来源：<https://fisharchive.cc/character-art/v1/download/deepseek-chibi.webp>，获取于 2026-11-05。
-- **授权提示**：仓库没有从来源页确认到明确的再分发许可，因此这张图**不适用**根目录的 MIT 代码许可，版权归原作者 / 来源平台所有；商用、二次分发或衍生作品前请自行取得授权。
-- 如果你是该素材的权利人并希望本项目替换或下架，请直接开 Issue，我们会尽快处理。
+- **授权**：**CC BY-NC-SA 4.0**（署名—非商业性使用—相同方式共享 4.0 国际），协议全文见 <https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.zh-hans>。
+- **署名**：原作「溟月」@上善无形 · DeepSeek 形象 @ZipZipPipe · 二创 @这个刀子真甜（以素材页标注为准）。
+- **限制**：不得用于商业目的；再分发或改编（包括本项目的头像裁切和图标）必须保留署名、附协议链接，并以 CC BY-NC-SA 4.0 相同方式共享。
+- **与代码的关系**：代码是 MIT，但图片素材不是 MIT；本项目整体包含非商业素材，**不能把整个仓库直接用于商业项目**。如需商用，请替换立绘及派生图标。
+- 如果你是该素材的权利人并希望补充署名、替换或下架，请直接开 Issue，我们会尽快处理。
 
 ## ❓ 常见问题
 
@@ -429,12 +449,12 @@ API Key 无效、过期或没有余额查询权限。去 DeepSeek 开放平台�
 ## 📜 免责声明
 
 - 本项目**不是 DeepSeek 官方项目**，与 DeepSeek 官方没有任何隶属或合作关系；「DeepSeek Logo 像大肥鱼」只是社区玩梗。
-- 形象素材来自 [fisharchive.cc](https://fisharchive.cc/character-art/v1/download/deepseek-chibi.webp)（由使用者指定替换），**不是 DeepSeek 官方素材**；代码采用 MIT，但图片素材不包含在 MIT 授权范围内，商用/再分发前请自行确认授权。DeepSeek 名称及相关商标归其权利人所有。
+- 形象素材来自 [fisharchive.cc](https://fisharchive.cc/character-art/v1/download/deepseek-chibi.webp)（由使用者指定替换），采用 **CC BY-NC-SA 4.0**，署名：原作「溟月」@上善无形 · DeepSeek 形象 @ZipZipPipe · 二创 @这个刀子真甜；**不是 DeepSeek 官方素材**。图片素材不包含在 MIT 授权范围内，禁止商业使用，改编需同协议共享；代码采用 MIT。DeepSeek 名称及相关商标归其权利人所有。
 - 「0.1 元 = 1 碗白饭」是虚构的趣味换算，不代表真实价格，也不涉及任何真实交易。
 - 排行榜昵称是公开可见的，**请勿使用真实姓名、手机号、邮箱或其他个人信息**；因昵称泄露造成的后果由使用者自行承担。
 - API 调用产生的费用由使用者自行承担；本项目不代管、不代付、不报销。
 - 如果你把后端部署在公网，你就是那个后端的运营者，请自行负责数据与合规。
-- 软件按 MIT 协议「按原样」提供，不附带任何明示或暗示的担保。
+- 软件（代码部分）按 MIT 协议「按原样」提供；形象素材按 CC BY-NC-SA 4.0 提供，禁止商业使用，不附带任何明示或暗示的担保。
 
 ## 🤝 贡献指南
 
@@ -457,11 +477,21 @@ API Key 无效、过期或没有余额查询权限。去 DeepSeek 开放平台�
 - v1.1.0 Release 文案（[docs/RELEASE_NOTES_v1.1.0.md](docs/RELEASE_NOTES_v1.1.0.md)）
 - GitHub Actions / 安全设置 / 素材授权注意事项
 
-发布前最重要的一句：**当前形象是社区二创素材，公开仓库前请先确认授权，否则建议先保持 Private 或替换素材。**
+发布前最重要的一句：**形象素材采用 CC BY-NC-SA 4.0，禁止商业使用，再分发必须保留署名与协议链接；代码是 MIT，但整个仓库不能直接商用。**
 
 ## 📄 License
 
-本项目采用 [MIT License](LICENSE)，Copyright (c) 2026 BigFatFish RiceEater Contributors。
+本项目采用**双许可证**，务必分清：
+
+| 范围 | 许可证 | 说明 |
+| --- | --- | --- |
+| 代码、SQL、脚本、测试、文档 | [MIT License](LICENSE) | Copyright (c) 2026 BigFatFish RiceEater Contributors |
+| 形象素材：`extension/assets/deepseek-chibi*.webp`、由头像生成的 `extension/icons/icon*.png` | **CC BY-NC-SA 4.0** | 署名：原作「溟月」@上善无形 · DeepSeek 形象 @ZipZipPipe · 二创 @这个刀子真甜；**禁止商业使用**；改编需同协议共享 |
+
+- CC BY-NC-SA 4.0 全文：<https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.zh-hans>
+- 素材来源与完整署名：[extension/assets/ATTRIBUTION.md](extension/assets/ATTRIBUTION.md)
+- 由于仓库包含非商业素材，**不能把整个仓库直接用于商业项目**；如果你要商用，请替换立绘与派生图标，或取得原作者授权。
+- GitHub 的 License 识别只读取根目录 `LICENSE`，会显示 MIT；图片素材的实际许可以本节与 `ATTRIBUTION.md` 为准。
 
 ---
 

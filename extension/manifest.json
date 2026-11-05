@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "大肥鱼的白饭日记",
   "version": "1.1.0",
-  "description": "读取 DeepSeek API 余额，把消耗换算成白饭（0.1 元 = 1 碗），附 16 个赛博干饭成就与匿名排行榜。",
+  "description": "读取 DeepSeek API 余额，把消耗换算成白饭（0.1 元 = 1 碗），附 16 个赛博干饭成就与匿名排行榜。AI 生成项目。",
   "permissions": [
     "storage",
     "alarms"

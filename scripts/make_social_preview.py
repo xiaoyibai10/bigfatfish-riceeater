@@ -110,7 +110,7 @@ def main():
     draw.text((112, 392), "16 个赛博干饭人成就 · 匿名排行榜", font=body_font, fill=(235, 241, 255))
 
     # 底部小字
-    draw.text((112, 520), "Chrome MV3  ·  Vercel  ·  Supabase  ·  MIT", font=small_font, fill=(210, 223, 255))
+    draw.text((112, 520), "AI 生成  ·  代码 MIT  ·  形象 CC BY-NC-SA 4.0", font=small_font, fill=(210, 223, 255))
 
     # 右下角小气泡装饰
     draw.ellipse([120, 470, 128, 478], fill=(255, 184, 77, 220))

@@ -386,17 +386,17 @@ create table if not exists public.rankings (
 - 主界面：`extension/assets/deepseek-chibi.webp`（941 × 1672 WebP，社区二创「大肥鱼娘」立绘）；
 - Header 头像：`extension/assets/deepseek-chibi-avatar.webp`（640 × 640 WebP，由立绘裁切，裁切区域 x=160, y=40, 640×640）；
 - 扩展图标：`scripts/make_icons.py` 用 Pillow 以头像为输入，生成 DeepSeek 蓝圆角底 + 圆形头像的 16/32/48/128 PNG；
-- 素材来源、获取日期与授权状态见 `extension/assets/ATTRIBUTION.md`：**图片不适用仓库的 MIT 代码许可**，商用/再分发前需自行确认授权；
+- 素材授权：**CC BY-NC-SA 4.0**（署名：原作「溟月」@上善无形 · DeepSeek 形象 @ZipZipPipe · 二创 @这个刀子真甜）；**图片不适用仓库的 MIT 代码许可**，禁止商业使用，改编需同协议共享；完整说明见 `extension/assets/ATTRIBUTION.md`；
 - 不再使用任何外部 SVG 吉祥物；页面中不得出现远程图片或 base64 大图。
 
 ## 8. README / 开源文件
 
 - README 风格：幽默、带梗、赛博打工人语气，但信息完整；必须包含：
-  banner 标题 + 一句话简介 + 徽章（Chrome MV3 / Vercel / Supabase / MIT）、
+  banner 标题 + 一句话简介 + AI 生成徽章 + 徽章（Chrome MV3 / Vercel / Supabase / MIT / CC BY-NC-SA）、
   目录、功能特性（配 emoji）、成就表（16 个）、截图位（`docs/screenshot-main.png` 等三张真实截图）、
   快速开始（① Supabase 建表 ② Vercel 部署 ③ 加载扩展 ④ 填写 Key）、
   环境变量表、API 文档、项目结构、防作弊说明、隐私说明、常见问题（余额为什么没变 / 401 / 排行榜不动 / 自定义后端域名）、
-  免责声明（非 DeepSeek 官方、API Key 仅存本地、排行榜公开昵称请勿使用真名）、License、贡献指南。
+  免责声明（非 DeepSeek 官方、AI 生成声明、API Key 仅存本地、排行榜公开昵称请勿使用真名、形象素材 CC BY-NC-SA 4.0）、License、贡献指南。
 - `.env.example` 仅两项：`SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY`，附中文注释与安全警告。
 - `.gitignore`：`node_modules/`、`.env*`（保留 `.env.example`）、`.vercel/`、`*.log`、`.DS_Store`、`Thumbs.db`。
 - LICENSE：MIT，版权人 `BigFatFish RiceEater Contributors`，年份 2026。

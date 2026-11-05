@@ -2,7 +2,9 @@
 
 这份文档面向第一次把项目挂到 GitHub 的维护者。照着做即可，不需要先学 Git。
 
-> ⚠️ **发布前最重要的一件事**：当前吉祥物是社区二创素材，来源页没有确认到明确的再分发许可。公开仓库等于公开再分发这张图；如果你不是作者、也没有获得授权，建议先**保持 Private**、换成自己绘制 / CC0 的图片，或联系作者取得许可。代码 MIT 不代表图片也能 MIT。
+> ⚠️ **发布前必须确认的两件事**：
+> 1. 形象素材采用 **CC BY-NC-SA 4.0**：公开仓库时必须保留原作者署名、素材来源与协议链接；**禁止商业使用**；改编（头像、图标）必须同协议共享。代码是 MIT，但整个仓库不能直接商用。
+> 2. 本项目由 AI 生成 / AI 辅助生成：README 首屏、Release Notes 和仓库 About 都要明确说明「AI 生成」，不能只靠代码注释。
 
 ## 0. 发布前检查（3 分钟）
 
@@ -26,8 +28,8 @@ git status
 
 ## 1. 仓库里已经有什么
 
-- `README.md`：完整的项目介绍（首屏截图、slogan、徽章、成就表、安装、API、防作弊、隐私、FAQ、免责声明）
-- `LICENSE`：MIT（代码部分）
+- `README.md`：完整的项目介绍（首屏截图、slogan、AI 生成声明、徽章、成就表、安装、API、防作弊、隐私、FAQ、免责声明、双许可证）
+- `LICENSE`：MIT（只覆盖代码；形象素材是 CC BY-NC-SA 4.0，见 `extension/assets/ATTRIBUTION.md`）
 - `.gitignore` / `.gitattributes`：忽略 `.env`、`node_modules`，统一 LF
 - `.env.example`
 - `extension/`、`api/`、`supabase/`、`tests/`、`scripts/`
@@ -58,11 +60,11 @@ git status
 1. 登录 <https://github.com>，点右上角 **+ → New repository**。
 2. **Repository name** 填 `bigfatfish-riceeater`。
 3. **Description** 先贴上：
-   > 读取 DeepSeek API 余额，把消耗换算成白饭（0.1 元 = 1 碗），带 16 个赛博干饭人成就与匿名排行榜的 Chrome MV3 扩展。
-4. 选择 **Public**（确认图片授权没问题再选）或 **Private**。
+   > 读取 DeepSeek API 余额，把消耗换算成白饭（0.1 元 = 1 碗），带 16 个赛博干饭人成就与匿名排行榜的 Chrome MV3 扩展（AI 生成项目）。
+4. 选择 **Public**（仓库已标注 CC BY-NC-SA 4.0 与 AI 生成声明）或 **Private**。
 5. **不要**勾选 "Add a README file"、"Add .gitignore"、"Choose a license"——本地已经全部有了，勾了会冲突。
 6. 点 **Create repository**，复制页面上的仓库地址，形如：
-   `https://github.com/<你的用户名>/bigfatfish-riceeater.git`
+   `https://github.com/xiaoyibai10/bigfatfish-riceeater.git`
 
 ### 方式 B：使用 GitHub CLI（装了 `gh` 的话）
 
@@ -76,7 +78,7 @@ git push origin v1.1.0
 
 ## 4. 推送本地代码
 
-在 `bigfatfish-riceeater` 目录里执行（把 `<你的用户名>` 换成自己的）：
+在 `bigfatfish-riceeater` 目录里执行（下面的 `xiaoyibai10` 已经按你的 GitHub 用户名填好；如果仓库名不同，同步替换）：
 
 ```bash
 # 如果还没有配置 Git 身份
@@ -84,7 +86,7 @@ git config --global user.name "你的名字"
 git config --global user.email "你的邮箱"
 
 # 关联远程仓库
-git remote add origin https://github.com/<你的用户名>/bigfatfish-riceeater.git
+git remote add origin https://github.com/xiaoyibai10/bigfatfish-riceeater.git
 
 # 确认当前分支叫 main（GitHub 默认也是 main）
 git branch -M main
@@ -107,13 +109,13 @@ GitHub 仓库首页右上角的 **About** 是最短的门面，建议：
 **Description（中文，约 70 字）**
 
 ```text
-读取 DeepSeek API 余额，把消耗换算成白饭（0.1 元 = 1 碗），带 16 个赛博干饭人成就与匿名排行榜的 Chrome MV3 扩展。
+读取 DeepSeek API 余额，把消耗换算成白饭（0.1 元 = 1 碗），带 16 个赛博干饭人成就与匿名排行榜的 Chrome MV3 扩展（AI 生成项目）。
 ```
 
 **Description（英文备选）**
 
 ```text
-A Chrome MV3 extension that turns DeepSeek API spending into rice bowls (¥0.1 = 1 bowl), with 16 achievements and an anonymous leaderboard.
+An AI-generated Chrome MV3 extension that turns DeepSeek API spending into rice bowls (¥0.1 = 1 bowl), with 16 achievements and an anonymous leaderboard. Code: MIT; mascot art: CC BY-NC-SA 4.0.
 ```
 
 **Topics（逐个粘贴）**
@@ -129,6 +131,7 @@ vercel
 gamification
 leaderboard
 javascript
+ai-generated
 ```
 
 **Website**：留空即可（没有在线 Demo 就不要写，避免“打不开的演示站”）。
@@ -140,24 +143,25 @@ javascript
 `README.md` 就是 GitHub 上真正的介绍文档，不需要再单独写一份“项目介绍”。当前 README 的首屏结构已经按开源项目习惯排好：
 
 1. **一张真实截图** + 项目名 + 一句话 slogan
-2. **徽章**：Manifest V3 / Vercel / Supabase / MIT
+2. **徽章**：AI Generated / Manifest V3 / Vercel / Supabase / MIT (code) / CC BY-NC-SA 4.0 (art)
 3. **一句话定位**：不是财务工具，是赛博打工人的干饭体检报告
-4. **功能特性**（emoji 列表）
-5. **三张截图** + 吐槽文案
-6. **16 个成就表**（和代码一致）
-7. **快速开始**：Supabase → Vercel → 加载扩展 → 填 Key
-8. **环境变量、API 文档、项目结构、防作弊、隐私、FAQ、免责声明、License**
+4. **AI 生成声明**：代码、文档、测试由 AI 生成 / 辅助生成，使用前自行审阅
+5. **功能特性**（emoji 列表）
+6. **三张截图** + 吐槽文案
+7. **16 个成就表**（和代码一致）
+8. **快速开始**：Supabase → Vercel → 加载扩展 → 填 Key
+9. **环境变量、API 文档、项目结构、防作弊、隐私、FAQ、免责声明、双许可证**
 
 写开源 README 的三条经验：
 
 - **首屏必须能“看懂 + 想试”**：截图、slogan、3 步安装，别把目录放在最上面。
-- **说清楚边界**：非官方、0.1 元是玩梗、API Key 只存本地、图片素材授权状态。
+- **说清楚边界**：非官方、AI 生成、0.1 元是玩梗、API Key 只存本地、形象素材 CC BY-NC-SA 4.0（禁止商用）。
 - **不要写不存在的东西**：没上架 Chrome Web Store、没有在线 Demo、没有用户量，就别写；开源项目最忌讳“README 吹得比代码多”。
 
 如果以后想在 README 顶部加 CI 徽章，等仓库地址确定后用：
 
 ```markdown
-![CI](https://github.com/<你的用户名>/bigfatfish-riceeater/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/xiaoyibai10/bigfatfish-riceeater/actions/workflows/ci.yml/badge.svg)
 ```
 
 ## 7. 发布 v1.1.0 Release
@@ -168,7 +172,7 @@ javascript
    ```text
    v1.1.0 · 大肥鱼娘来了
    ```
-4. **Describe this release** 粘贴 `docs/RELEASE_NOTES_v1.1.0.md` 的内容，并把里面的 `你的用户名` 改成自己的。
+4. **Describe this release** 粘贴 `docs/RELEASE_NOTES_v1.1.0.md` 的内容；图片 URL 已经用的是 `xiaoyibai10`，如果你改了仓库名/用户名记得同步替换。
 5. 可选：把 `bigfatfish-riceeater-v1.1.0.zip` 拖进 **Attach binaries**。
 6. 点 **Publish release**。
 
@@ -206,11 +210,12 @@ GitHub 会自动重定向旧地址，但 README 里如果写了绝对链接需�
 
 ### 图片太大 / 被 GitHub 拒绝
 
-本项目图片总共约 1 MB，远低于 100 MB 单文件限制，不需要 Git LFS。
+本项目图片总共约 1.5 MB，远低于 100 MB 单文件限制，不需要 Git LFS。
 
 ## 10. 最后检查清单
 
-- [ ] 图片素材授权确认（否则先 Private）
+- [ ] 形象素材 CC BY-NC-SA 4.0 的署名、协议链接、非商业提示已展示
+- [ ] README / Release / About 都写明了「AI 生成」
 - [ ] `git status` 干净
 - [ ] 测试通过、CI 绿
 - [ ] About 描述 / Topics / Social preview 已填
